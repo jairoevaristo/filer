@@ -13,6 +13,6 @@ Filer é um projeto de sistema de compartilhamento de arquivos que implementa cr
 - Tailwindcss
 - Supabase
 - PostgreSQL
-- CryptoJS
+- CryptoJs
 - Shadcn/ui
 - Prisma ORM
