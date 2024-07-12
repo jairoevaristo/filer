@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  password     String
+  avatar       String
+  socketId     String?        @map("socket_id")
+  file         File[]
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  shares       Share[]
+  Notification Notification[]
+
+  @@map("users")
+}
+
+model File {
+  id           String   @id @default(cuid())
+  name         String
+  url          String
+  supabasePath String   @map("supabase_path")
+  mimetype     String
+  size         Int
+  userId       String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  share        Share[]
+
+  @@map("files")
+}
+
+model Share {
+  id               String         @id @default(cuid())
+  fileId           String
+  userId           String
+  public_share     Boolean?       @default(false)
+  permission       Permission
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  sharedToUsersIds User[]
+  file             File           @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  Notification     Notification[]
+
+  @@map("shares")
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  isMarkView     Boolean  @default(false) @map("is_mark_view")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  userToSharedId String
+  shareId        String
+  userId         String
+  shares         Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  users          User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+enum Permission {
+  VIEWER
+  EDITOR
+}
